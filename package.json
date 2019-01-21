@@ -1,0 +1,25 @@
+{
+    "name": "fso-part3",
+    "version": "1.0.0",
+    "description": "FullStackOpen course, part 3!",
+    "main": "index.js",
+    "scripts": {
+        "watch": "nodemon index.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "node index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/frozenzia/hello-world.git"
+    },
+    "author": "Paul BROWN",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/frozenzia/hello-world/issues"
+    },
+    "homepage": "https://github.com/frozenzia/hello-world#readme",
+    "devDependencies": {
+        "express": "^4.16.4",
+        "nodemon": "^1.18.9"
+    }
+}
