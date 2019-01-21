@@ -1,11 +1,7 @@
-# hello-world
-Trying the full stack course
+# fso-part3
+FullStackOpen course, part 3!
 
-My name is Paul Brown, I'm a 51-yr-old dude at this point and working on this course with my son Milo. We're gonna **try** and get thru it before the deadline in December.
-
-I am adding a few words of text via labs.play-with-docker.com. Need to be sure that I can set things up from here if need be.
-
- - list 1
- - list 2
-
-Maybe.
+This was originally a plain hello world repository - the 1st one in the course, and
+I'm sad to say that I *still* need help with git and getting my head around it, but
+for part 3 of the course it was recommended to have this in a totally separate repo,
+and as far as I know, that's what I'm doing now.
