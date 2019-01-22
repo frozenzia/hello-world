@@ -1,7 +1,16 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const morg = require('morgan');
+const cors = require('cors');
+
+app.use(cors());
 app.use(bodyParser.json());
+morg.token('content', req => {
+    return JSON.stringify(req.body);
+})
+
+app.use(morg(':method :url :content :status :res[content-length] - :response-time ms'));
 
 let folks = [
     {
@@ -73,5 +82,7 @@ const _alreadyExists = name => {
     return (folks.findIndex(f => f.name.toLowerCase() === name.toLowerCase()) > -1);
 }
 
-const port = 3001
-app.listen(port)
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+})
