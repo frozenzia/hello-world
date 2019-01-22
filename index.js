@@ -5,6 +5,7 @@ const morg = require('morgan');
 const cors = require('cors');
 
 app.use(cors());
+app.use(express.static('build'));
 app.use(bodyParser.json());
 morg.token('content', req => {
     return JSON.stringify(req.body);

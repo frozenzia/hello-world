@@ -5,3 +5,5 @@ This was originally a plain hello world repository - the 1st one in the course, 
 I'm sad to say that I *still* need help with git and getting my head around it, but
 for part 3 of the course it was recommended to have this in a totally separate repo,
 and as far as I know, that's what I'm doing now.
+
+Link to the Heroku version is here: https://secret-bastion-93556.herokuapp.com/api/persons
