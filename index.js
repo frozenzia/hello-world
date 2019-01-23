@@ -10,7 +10,7 @@ app.use(express.static('build'));
 app.use(bodyParser.json());
 morg.token('content', req => {
     return JSON.stringify(req.body);
-})
+});
 
 app.use(morg(':method :url :content :status :res[content-length] - :response-time ms'));
 
@@ -18,16 +18,16 @@ app.get('/info', (req, res) => {
     Folk
         .find({}, { __v: 0 })
         .then(folksDB => {
-            numFolks = folksDB.length;
+            const numFolks = folksDB.length;
             res.send(`<p>puhelinluettelossa ${numFolks} henkilön tiedot</p><p>${Date()}</p>`);
         });
-})
+});
 
 app.get('/api/persons', (req, res) => {
     Folk
         .find({}, { __v: 0 })
         .then(folksDB => res.json(folksDB.map(Folk.formatFolk)));
-})
+});
 
 app.get('/api/persons/:id', (req, res) => {
     Folk
@@ -41,16 +41,16 @@ app.get('/api/persons/:id', (req, res) => {
             }
         })
         .catch(error => {
-            console.log(error)
-            response.status(400).send({ error: 'malformatted id' })
+            console.log(error);
+            res.status(400).send({ error: 'malformatted id' });
         });
-})
+});
 
 app.post('/api/persons', (req, res) => {
-    const {name, phone} = req.body;
+    const { name, phone } = req.body;
     if (name && phone) {
         console.log('checking for existing');
-        const regex = new RegExp(name, "i");
+        const regex = new RegExp(name, 'i');
         Folk
             .find({ name: regex }, { __v: 0 })
             .then(folksDB => {
@@ -59,7 +59,7 @@ app.post('/api/persons', (req, res) => {
             })
             .then(personExists => {
                 if (personExists) {
-                    error = 'nimi on oltava yksiselitteinen';
+                    const error = 'nimi on oltava yksiselitteinen';
                     res.status(403).json({ error });
                 } else {
                     const folk = new Folk({ name, phone });
@@ -76,18 +76,18 @@ app.post('/api/persons', (req, res) => {
         else error = 'puhelinnumero puutuu';
         res.status(400).json({ error });
     }
-})
+});
 
 app.delete('/api/persons/:id', (req, res) => {
     Folk
         .findByIdAndRemove(req.params.id)
-        .then(result => {
+        .then(() => {
             res.status(204).end();
         })
-        .catch(error => {
+        .catch(() => {
             res.status(400).send({ error: 'malformatted id' });
         });
-})
+});
 
 app.put('/api/persons/:id', (req, res) => {
     const body = req.body;
@@ -110,4 +110,4 @@ app.put('/api/persons/:id', (req, res) => {
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
-})
+});

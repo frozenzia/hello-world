@@ -11,25 +11,25 @@ const Folk = mongoose.model('Folk', {
 if (process.argv.length === 4) {
     const [,,name, phone] = process.argv;
     const folk = new Folk({
-            name,
-            phone
-        });
+        name,
+        phone
+    });
 
-        folk
-            .save()
-            .then(resp => {
-                    console.log(`lisätään henkilö ${name} numero ${phone} luetteloon`);
-                    mongoose.connection.close();
-                });
+    folk
+        .save()
+        .then(resp => {
+            console.log(`lisätään henkilö ${name} numero ${phone} luetteloon`);
+            mongoose.connection.close();
+        });
 } else if (process.argv.length === 2) {
     Folk
-    .find({})
-    .then(result => {
-        result.forEach(folk => {
-            console.log(folk);
+        .find({})
+        .then(result => {
+            result.forEach(folk => {
+                console.log(folk);
+            });
+            mongoose.connection.close();
         });
-        mongoose.connection.close();
-    });
 } else {
     console.log('Usage: node mongo.js <name> <number> (add to phonebook) OR node mongo.js (print phonebook)');
     mongoose.connection.close();
