@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const morg = require('morgan');
 const cors = require('cors');
+const Folk = require('./models/folk');
 
 app.use(cors());
 app.use(express.static('build'));
@@ -13,75 +14,98 @@ morg.token('content', req => {
 
 app.use(morg(':method :url :content :status :res[content-length] - :response-time ms'));
 
-let folks = [
-    {
-      "name": "Arto Hellas",
-      "phone": "040-123456",
-      "id": 1
-    },
-    {
-      "name": "Martti Tienari",
-      "phone": "040-123456",
-      "id": 2
-    },
-    {
-      "name": "Arto Järvinen",
-      "phone": "040-123456",
-      "id": 3
-    },
-    {
-      "name": "Lea KutvAAAAnen",
-      "phone": "040-123456",
-      "id": 4
-    }
-];
-
 app.get('/info', (req, res) => {
-    numFolks = folks.length;
-    res.send(`<p>puhelinluettelossa ${numFolks} henkilön tiedot</p><p>${Date()}</p>`);
+    Folk
+        .find({}, { __v: 0 })
+        .then(folksDB => {
+            numFolks = folksDB.length;
+            res.send(`<p>puhelinluettelossa ${numFolks} henkilön tiedot</p><p>${Date()}</p>`);
+        });
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(folks);
+    Folk
+        .find({}, { __v: 0 })
+        .then(folksDB => res.json(folksDB.map(Folk.formatFolk)));
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    const folk = folks.find(f => f.id === id);
-    if (folk) {
-        res.json(folk);
-    } else {
-        console.log('folk: ', folk);
-        res.status(404).end();
-    }
+    Folk
+        .findById(req.params.id, { __v: 0 })
+        .then(folksDB => {
+            if (folksDB) {
+                res.json(Folk.formatFolk(folksDB));
+            } else {
+                console.log('folksDB: ', folksDB);
+                res.status(404).end();
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        });
 })
 
 app.post('/api/persons', (req, res) => {
-    const id = Math.floor(Math.random() * 500000);
     const {name, phone} = req.body;
-    if (name && phone && !_alreadyExists(name)) {
-        const folk = { id, name, phone };
-        folks = folks.concat(folk);
-        res.json(folk);
+    if (name && phone) {
+        console.log('checking for existing');
+        const regex = new RegExp(name, "i");
+        Folk
+            .find({ name: regex }, { __v: 0 })
+            .then(folksDB => {
+                console.log('searching for', name, ' results are: ', folksDB);
+                return (folksDB.length > 0) ? true : false;
+            })
+            .then(personExists => {
+                if (personExists) {
+                    error = 'nimi on oltava yksiselitteinen';
+                    res.status(403).json({ error });
+                } else {
+                    const folk = new Folk({ name, phone });
+                    folk
+                        .save()
+                        .then(savedFolk => {
+                            res.json(Folk.formatFolk(savedFolk));
+                        });
+                }
+            });
     } else {
         let error = '';
         if (!name) error = 'nimi puuttuu';
-        else if (!phone) error = 'puhelinnumero puutuu';
-        else error = 'nimi on oltava yksiselitteinen';
+        else error = 'puhelinnumero puutuu';
         res.status(400).json({ error });
     }
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id);
-    folks = folks.filter(f => f.id !== id);
-    res.status(204).end();
+    Folk
+        .findByIdAndRemove(req.params.id)
+        .then(result => {
+            res.status(204).end();
+        })
+        .catch(error => {
+            res.status(400).send({ error: 'malformatted id' });
+        });
 })
 
-const _alreadyExists = name => {
-    console.log('checking for existing');
-    return (folks.findIndex(f => f.name.toLowerCase() === name.toLowerCase()) > -1);
-}
+app.put('/api/persons/:id', (req, res) => {
+    const body = req.body;
+    const folk = {
+        name: body.name,
+        phone: body.phone
+    };
+
+    Folk
+        .findByIdAndUpdate(req.params.id, folk, { new: true }) // send back the NEW record
+        .then(updatedFolk => {
+            res.json(Folk.formatFolk(updatedFolk));
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(400).send({ error: 'malformatted id' });
+        });
+});
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
