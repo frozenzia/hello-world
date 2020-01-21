@@ -1,8 +1,12 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
+const morgan = require('morgan')
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+morgan.token('content', req => JSON.stringify(req.body));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
 
 let persons = [
   {
@@ -44,7 +48,6 @@ app.get('/persons', (req, res) => {
 
 app.get('/persons/:id', (req, res) => {
   const id = Number(req.params.id);
-  console.log(id);
   const personToFind = persons.find(p => p.id === id);
   if (personToFind) return res.json(personToFind)
   // else
@@ -53,7 +56,6 @@ app.get('/persons/:id', (req, res) => {
 
 app.delete('/persons/:id', (req, res) => {
   const id = Number(req.params.id);
-  console.log(id);
   persons = persons.filter(p => p.id !== id);
   return res.status(204).end()
 })
@@ -66,11 +68,9 @@ app.post('/persons', (req, res) => {
   if ( newPerson.name && newPerson.name !== ''
     && newPerson.phone && newPerson.phone !== '') {
       const newName = newPerson.name.toLowerCase();
-      console.log('newName: ', newName);
       if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
         // create ID for entry
         const id = Math.floor(Math.random() * 1000000000);
-        console.log('id: ', id);
         newPerson.id = id;
         persons.push(newPerson);
         return res.json(persons);
