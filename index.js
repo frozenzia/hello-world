@@ -59,15 +59,30 @@ app.delete('/persons/:id', (req, res) => {
 })
 
 app.post('/persons', (req, res) => {
-  // create ID for entry
-  const id = Math.floor(Math.random() * 1000000000);
-  console.log('id: ', id);
   const newPerson = {
-    id,
     ...req.body
   };
-  persons.push(newPerson);
-  res.json(persons);
+  let error = '';
+  if ( newPerson.name && newPerson.name !== ''
+    && newPerson.phone && newPerson.phone !== '') {
+      const newName = newPerson.name.toLowerCase();
+      console.log('newName: ', newName);
+      if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
+        // create ID for entry
+        const id = Math.floor(Math.random() * 1000000000);
+        console.log('id: ', id);
+        newPerson.id = id;
+        persons.push(newPerson);
+        return res.json(persons);
+      } else {
+        // name must be unique!
+        error = 'name must be unique'
+      }
+  } else {
+    // something's missing!
+    error = 'request must include both a non-empty "name" and a non-empty "phone" field';
+  }
+  return res.status(400).json({ error })
 })
 
 const PORT = 3001
