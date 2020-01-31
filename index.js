@@ -1,7 +1,10 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
+
+const Person = require('./models/person.js');
 
 const app = express();
 app.use(cors());
@@ -46,9 +49,27 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Person.find({})
+    .then(persons => res.json(persons.map(person => person.toJSON())));
 })
-
+// ###
+// if (name) { // we should also have a phoneNumber, and we're adding a name to phone book
+//   const person = new Person({ name, phone });
+//
+//   person.save()
+//     .then((resp) => {
+//       console.log(`added ${resp.name} number ${resp.phone} to phonebook`);
+//       mongoose.connection.close();
+//     });
+// } else { // just supposed to print out current list
+//   console.log('phonebook:');
+//   Person.find({})
+//     .then(result => {
+//       result.forEach(person => {console.log(`${person.name} ${person.phone}`);});
+//       mongoose.connection.close();
+//     });
+// }
+// ###
 app.get('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id);
   const personToFind = persons.find(p => p.id === id);
@@ -88,7 +109,7 @@ app.post('/api/persons', (req, res) => {
   return res.status(400).json({ error })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
