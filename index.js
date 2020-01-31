@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 
+const errorHandler = require('./errorHandler');
 const Person = require('./models/person.js');
 
 const app = express();
@@ -34,17 +35,32 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const personToFind = persons.find(p => p.id === id);
-  if (personToFind) return res.json(personToFind)
-  // else
-  return res.status(404).end()
+  Person.findById(req.params.id)
+    .then((resp) => {
+      if (resp) {
+        res.json(resp.toJSON())
+      } else {
+        res.status(404).end()
+      }
+    })
+    .catch(error => next(error));
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id);
-  persons = persons.filter(p => p.id !== id);
-  return res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndRemove(req.params.id)
+    .then(() => {
+      res.status(204).end()
+    })
+    .catch(error => next(error));
+})
+
+app.put('/api/persons/:id', (req, res, next) => {
+  const body = req.body;
+  Person.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    .then((resp) => {
+      res.json(resp.toJSON())
+    })
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (req, res) => {
@@ -76,3 +92,5 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+app.use(errorHandler);
