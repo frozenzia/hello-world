@@ -14,62 +14,25 @@ app.use(bodyParser.json());
 morgan.token('content', req => JSON.stringify(req.body));
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'));
 
-let persons = [
-  {
-    "name": "Arto Hellas",
-    "phone": "040-123456",
-    "id": 1
-  },
-  {
-    "name": "Dan Abramov",
-    "phone": "123-456-789",
-    "id": 3
-  },
-  {
-    "name": "Donna Poppendieck",
-    "phone": "123-456-789",
-    "id": 4
-  },
-  {
-    "name": "BJ Hunnicut",
-    "phone": "55555",
-    "id": 5
-  }
-];
-
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
 })
 
 app.get('/info', (req, res) => {
-  res.send(
-    `<p>Phonebook has info for ${persons.length} people</p>` +
-    `<p>${Date()}</p>`
-  )
+  Person.find({})
+    .then(persons =>
+      res.send(
+        `<p>Phonebook has info for ${persons.length} people</p>` +
+        `<p>${Date()}</p>`
+      )
+    )
 })
 
 app.get('/api/persons', (req, res) => {
   Person.find({})
     .then(persons => res.json(persons.map(person => person.toJSON())));
 })
-// ###
-// if (name) { // we should also have a phoneNumber, and we're adding a name to phone book
-//   const person = new Person({ name, phone });
-//
-//   person.save()
-//     .then((resp) => {
-//       console.log(`added ${resp.name} number ${resp.phone} to phonebook`);
-//       mongoose.connection.close();
-//     });
-// } else { // just supposed to print out current list
-//   console.log('phonebook:');
-//   Person.find({})
-//     .then(result => {
-//       result.forEach(person => {console.log(`${person.name} ${person.phone}`);});
-//       mongoose.connection.close();
-//     });
-// }
-// ###
+
 app.get('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id);
   const personToFind = persons.find(p => p.id === id);
@@ -85,28 +48,28 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-  const newPerson = {
-    ...req.body
-  };
+  const newPerson = new Person({ ...req.body });
   let error = '';
   if ( newPerson.name && newPerson.name !== ''
     && newPerson.phone && newPerson.phone !== '') {
-      const newName = newPerson.name.toLowerCase();
-      if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
-        // create ID for entry
-        const id = Math.floor(Math.random() * 1000000000);
-        newPerson.id = id;
-        persons.push(newPerson);
-        return res.json(persons);
-      } else {
+      // const newName = newPerson.name.toLowerCase();
+      // if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
+        newPerson.save()
+          .then(resp => {
+            console.log(`added ${resp.name} number ${resp.phone} to phonebook`)
+            console.log('resp.toJSON(): ', resp.toJSON());
+            return res.json(resp.toJSON());
+          });
+        // return res.json(persons);
+      // } else {
         // name must be unique!
-        error = 'name must be unique'
-      }
+      //   error = 'name must be unique'
+      // }
   } else {
     // something's missing!
     error = 'request must include both a non-empty "name" and a non-empty "phone" field';
+    return res.status(400).json({ error })
   }
-  return res.status(400).json({ error })
 })
 
 const PORT = process.env.PORT;
