@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 
 // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
 // by default, you need to set it to false.
 mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 const url = process.env.MONGODB_URI
 
@@ -17,8 +19,17 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
   });
 
 const personSchema = new mongoose.Schema({
-  name: String,
-  phone: String,
+  name: {
+    type: String,
+    minlength: 3,
+    required: true,
+    unique: true,
+  },
+  phone: {
+    type: String,
+    minlength: 8,
+    required: true,
+  },
 });
 personSchema.set('toJSON', {
   transform: (document, returnedObject) => {
@@ -27,5 +38,8 @@ personSchema.set('toJSON', {
     delete returnedObject.__v
   }
 })
+
+// Apply the uniqueValidator plugin to personSchema.
+personSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Person', personSchema); // store in collection 'persons or people' (1st param, lowercase plural!)

@@ -63,7 +63,7 @@ app.put('/api/persons/:id', (req, res, next) => {
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
   const newPerson = new Person({ ...req.body });
   let error = '';
   if ( newPerson.name && newPerson.name !== ''
@@ -75,7 +75,8 @@ app.post('/api/persons', (req, res) => {
             console.log(`added ${resp.name} number ${resp.phone} to phonebook`)
             console.log('resp.toJSON(): ', resp.toJSON());
             return res.json(resp.toJSON());
-          });
+          })
+          .catch(error => next(error));
         // return res.json(persons);
       // } else {
         // name must be unique!
