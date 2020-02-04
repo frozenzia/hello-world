@@ -34,7 +34,7 @@ app.get('/api/persons', (req, res) => {
     .then(persons => res.json(persons.map(person => person.toJSON())));
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then((resp) => {
       if (resp) {
@@ -55,7 +55,6 @@ app.delete('/api/persons/:id', (req, res, next) => {
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-  const body = req.body;
   Person.findByIdAndUpdate(req.params.id, req.body, { new: true })
     .then((resp) => {
       res.json(resp.toJSON())
@@ -68,20 +67,20 @@ app.post('/api/persons', (req, res, next) => {
   let error = '';
   if ( newPerson.name && newPerson.name !== ''
     && newPerson.phone && newPerson.phone !== '') {
-      // const newName = newPerson.name.toLowerCase();
-      // if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
-        newPerson.save()
-          .then(resp => {
-            console.log(`added ${resp.name} number ${resp.phone} to phonebook`)
-            console.log('resp.toJSON(): ', resp.toJSON());
-            return res.json(resp.toJSON());
-          })
-          .catch(error => next(error));
-        // return res.json(persons);
-      // } else {
-        // name must be unique!
-      //   error = 'name must be unique'
-      // }
+    // const newName = newPerson.name.toLowerCase();
+    // if (persons.find(p => p.name.toLowerCase() === newName) === undefined) {
+    newPerson.save()
+      .then(resp => {
+        console.log(`added ${resp.name} number ${resp.phone} to phonebook`)
+        console.log('resp.toJSON(): ', resp.toJSON());
+        return res.json(resp.toJSON());
+      })
+      .catch(error => next(error));
+    // return res.json(persons);
+    // } else {
+    // name must be unique!
+    //   error = 'name must be unique'
+    // }
   } else {
     // something's missing!
     error = 'request must include both a non-empty "name" and a non-empty "phone" field';
