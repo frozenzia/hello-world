@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 if (process.argv.length < 3 || process.argv.length === 4) {
-    console.log('Usage: node mongo <db-password> (<name to add> <phone number to add>)');
-    process.exit(1);
+  console.log('Usage: node mongo <db-password> (<name to add> <phone number to add>)');
+  process.exit(1);
 }
 
 const password = process.argv[2];
